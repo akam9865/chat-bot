@@ -9,12 +9,12 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "typescript": "^5.9.3",
     "ws": "^8.19.0"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "tsx": "^4.21.0"
   },
   "engines": {
     "node": ">=22"
