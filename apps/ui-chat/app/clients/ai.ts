@@ -7,8 +7,11 @@ export async function sendMessage(
 ): Promise<ChatTurn> {
   const res = await fetch("/api/chat", {
     method: "POST",
-    headers: { "Content-Type": "application/json" }, // todo: JWT
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ content, clientMessageId, conversationId }),
+    credentials: "include",
   });
 
   if (!res.ok) {

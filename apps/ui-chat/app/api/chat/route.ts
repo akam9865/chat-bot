@@ -2,6 +2,9 @@ import { postUserMessage } from "../../../server/ai/anthropic";
 import z from "zod";
 import { Role, Status } from "../../../shared/ai/schemas";
 import { randomUUID } from "crypto";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { verifyToken } from "../../../lib/auth/jwt";
 
 const PostUserMessageSchema = z.object({
   content: z.string(),
@@ -10,6 +13,18 @@ const PostUserMessageSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const token = (await cookies()).get("auth_token")?.value;
+  if (!token) {
+    return NextResponse.json({ message: "unathorized" }, { status: 401 });
+  }
+
+  // todo: DRY this
+  try {
+    await verifyToken(token);
+  } catch {
+    return NextResponse.json({ message: "unathorized" }, { status: 401 });
+  }
+
   const body: unknown = await request.json();
   const {
     content,
