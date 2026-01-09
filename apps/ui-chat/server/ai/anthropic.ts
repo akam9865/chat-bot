@@ -2,13 +2,13 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import z from "zod";
-import { Message } from "../../shared/ai/schemas";
+import { Message, Status } from "../../shared/ai/schemas";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const MessageSchema = z.object({
+const AnthropicMessageSchema = z.object({
   text: z.string(),
   type: z.union([z.literal("text")]),
 });
@@ -17,9 +17,9 @@ const ChatResponseSchema = z.object({
   id: z.string(),
   model: z.string(),
   role: z.literal("assistant"),
-  stop_reason: z.string(), // todo: define union
+  stop_reason: z.string(), // todo: define union, or derive from type Anthropic.Message
   type: z.string(),
-  content: MessageSchema.array(),
+  content: AnthropicMessageSchema.array(),
 });
 
 export async function postUserMessage(message: string): Promise<Message> {
@@ -38,6 +38,8 @@ export async function postUserMessage(message: string): Promise<Message> {
   return {
     id: data.id,
     role: data.role,
+    status: Status.SENT,
     text,
+    timestamp: Date.now(),
   };
 }

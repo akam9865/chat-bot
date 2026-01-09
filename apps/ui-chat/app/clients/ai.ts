@@ -1,10 +1,14 @@
-import { type Message, MessageSchema } from "../../shared/ai/schemas";
+import { type ChatTurn, ChatTurnSchema } from "../../shared/ai/schemas";
 
-export async function sendMessage(message: string): Promise<Message> {
+export async function sendMessage(
+  content: string,
+  clientMessageId: string,
+  conversationId?: string
+): Promise<ChatTurn> {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" }, // todo: JWT
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ content, clientMessageId, conversationId }),
   });
 
   if (!res.ok) {
@@ -13,5 +17,5 @@ export async function sendMessage(message: string): Promise<Message> {
   }
 
   const json: unknown = await res.json();
-  return MessageSchema.parse(json);
+  return ChatTurnSchema.parse(json);
 }
