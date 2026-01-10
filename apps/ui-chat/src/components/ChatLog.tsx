@@ -1,7 +1,7 @@
 "use client";
 import { observer } from "mobx-react-lite";
 import { chatStore } from "../stores/chat";
-import { Message } from "../../shared/ai/schemas";
+import { Message } from "../shared/types/chat";
 
 export const ChatLog = observer(() => {
   return (

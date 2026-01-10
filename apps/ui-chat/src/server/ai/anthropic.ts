@@ -2,7 +2,7 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import z from "zod";
-import { Message, Status } from "../../shared/ai/schemas";
+import { Message, Status } from "../../shared/types/chat";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,

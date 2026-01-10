@@ -1,4 +1,4 @@
-import { type ChatTurn, ChatTurnSchema } from "../../shared/ai/schemas";
+import { type ChatTurn, ChatTurnSchema } from "../shared/types/chat";
 
 export async function sendMessage(
   content: string,

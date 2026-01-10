@@ -5,7 +5,7 @@ import {
   type Message,
   Role,
   Status,
-} from "../../shared/ai/schemas";
+} from "../shared/types/chat";
 
 type ChatForm = {
   input: string;

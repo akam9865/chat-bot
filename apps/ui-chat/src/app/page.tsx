@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import { ChatContainer } from "./components/ChatContainer";
+import { ChatContainer } from "../components/ChatContainer";
 import styles from "./page.module.css";
 import { getAuthorization } from "../lib/auth/getAuthorization";
-import { Login } from "./components/Login";
+import { Login } from "../components/Login";
 
 async function Auth() {
   const isAuthorized = await getAuthorization();

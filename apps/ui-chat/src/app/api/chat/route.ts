@@ -1,6 +1,6 @@
 import { postUserMessage } from "../../../server/ai/anthropic";
 import z from "zod";
-import { Role, Status } from "../../../shared/ai/schemas";
+import { Role, Status } from "../../../shared/types/chat";
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
