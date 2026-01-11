@@ -1,16 +1,30 @@
-import { type ChatTurn, ChatTurnSchema } from "../shared/types/chat";
+import {
+  type SendMessageResponse,
+  SendMessageResponseSchema,
+} from "../shared/types/chat";
 
-export async function sendMessage(
-  content: string,
-  clientMessageId: string,
-  conversationId?: string
-): Promise<ChatTurn> {
+export async function sendMessage({
+  conversationId,
+  userClientMessageId,
+  assistantClientMessageId,
+  text,
+}: {
+  conversationId: string;
+  userClientMessageId: string;
+  assistantClientMessageId: string;
+  text: string;
+}): Promise<SendMessageResponse> {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ content, clientMessageId, conversationId }),
+    body: JSON.stringify({
+      content: text,
+      userClientMessageId,
+      assistantClientMessageId,
+      conversationId,
+    }),
     credentials: "include",
   });
 
@@ -20,5 +34,6 @@ export async function sendMessage(
   }
 
   const json: unknown = await res.json();
-  return ChatTurnSchema.parse(json);
+
+  return SendMessageResponseSchema.parse(json);
 }

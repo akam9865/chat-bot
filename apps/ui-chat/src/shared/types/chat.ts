@@ -17,17 +17,19 @@ const RoleSchema = z.enum([
 export const Status = {
   PENDING: "pending",
   SENT: "sent",
+  FAILED: "failed",
 } as const;
-type Status = (typeof Status)[keyof typeof Status];
+export type Status = (typeof Status)[keyof typeof Status];
 const StatusSchema = z.enum([
   //
   Status.PENDING,
   Status.SENT,
+  Status.FAILED,
 ]);
 
 export const MessageSchema = z.object({
   id: z.string().optional(),
-  clientMessageId: z.string().optional(), // todo: think about separate message schemas by role
+  clientMessageId: z.string(),
   role: RoleSchema,
   status: StatusSchema,
   text: z.string(),
@@ -41,3 +43,14 @@ export const ChatTurnSchema = z.object({
   assistantMessage: MessageSchema,
 });
 export type ChatTurn = z.infer<typeof ChatTurnSchema>;
+
+export const SendMessageResponseSchema = z.object({
+  messages: z.array(
+    z.object({
+      clientMessageId: z.string(),
+      text: z.string(),
+      status: StatusSchema,
+    })
+  ),
+});
+export type SendMessageResponse = z.infer<typeof SendMessageResponseSchema>;

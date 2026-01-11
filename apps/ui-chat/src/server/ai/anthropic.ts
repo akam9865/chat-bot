@@ -22,7 +22,7 @@ const ChatResponseSchema = z.object({
   content: AnthropicMessageSchema.array(),
 });
 
-export async function postUserMessage(message: string): Promise<Message> {
+export async function postUserMessage(message: string): Promise<string> {
   const response = await client.messages.create({
     max_tokens: 100,
     messages: [{ role: "user", content: message }],
@@ -30,16 +30,8 @@ export async function postUserMessage(message: string): Promise<Message> {
   });
 
   const data = ChatResponseSchema.parse(response);
-  const text = data.content
+  return data.content
     .filter((block) => block.type === "text")
     .map((block) => block.text || "")
     .join("");
-
-  return {
-    id: data.id,
-    role: data.role,
-    status: Status.SENT,
-    text,
-    timestamp: Date.now(),
-  };
 }
