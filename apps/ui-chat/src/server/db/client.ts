@@ -1,17 +1,27 @@
 import "server-only";
 
 import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import postgres, { Sql } from "postgres";
 
-const connectionString = process.env.SUPABASE_DB_URL;
+let db: ReturnType<typeof drizzle> | null = null;
+let sql: Sql | null = null;
 
-if (!connectionString) {
-  throw new Error("Missing SUPABASE_DB_URL");
+function connect() {
+  const connectionString = process.env.SUPABASE_DB_URL;
+  if (!connectionString) {
+    throw new Error("Missing SUPABASE_DB_URL");
+  }
+  if (!sql) {
+    sql = postgres(connectionString, {
+      ssl: "require",
+    });
+  }
+  if (!db) {
+    db = drizzle(sql);
+  }
+  return db;
 }
 
-const sql = postgres(connectionString, {
-  ssl: "require",
-});
-
-export const db = drizzle(sql);
-export { sql };
+export function getDb() {
+  return db ?? connect();
+}

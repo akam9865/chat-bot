@@ -1,12 +1,14 @@
 import "server-only";
 
-import { db } from "../../server/db/client";
+import { getDb } from "../../server/db/client";
 import {
   conversations,
   messages as messagesTable,
 } from "../../server/db/schema";
 import { Status, type Message } from "../../shared/types/chat";
 import { and, eq } from "drizzle-orm";
+
+const db = getDb();
 
 export async function appendMessages(
   conversationId: string,
