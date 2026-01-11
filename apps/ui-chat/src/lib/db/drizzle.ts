@@ -8,12 +8,11 @@ import {
 import { Status, type Message } from "../../shared/types/chat";
 import { and, eq } from "drizzle-orm";
 
-const db = getDb();
-
 export async function appendMessages(
   conversationId: string,
   messages: Message[]
 ) {
+  const db = getDb();
   await db.transaction(async (tx) => {
     await tx
       .insert(conversations)
@@ -48,6 +47,7 @@ export async function updateMessage(
   messageId: string,
   text: string
 ) {
+  const db = getDb();
   await db
     .update(messagesTable)
     .set({ text, status: Status.SENT })
