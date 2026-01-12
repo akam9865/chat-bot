@@ -38,11 +38,12 @@ class ChatStore {
     const assistantMessageId = crypto.randomUUID();
     const timestamp = Date.now();
 
+    // Optimistically update the UI for the user message only
     const userMessage = {
       role: Role.USER,
       clientMessageId,
       text,
-      status: Status.PENDING,
+      status: Status.SENT,
       timestamp,
     };
     const pendingAssistantMessage = {
