@@ -3,7 +3,7 @@ import { ChatLog } from "./ChatLog";
 
 export const ChatContainer = () => {
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-dvh min-h-0">
       <SidePanel />
       <MessagePanel />
     </div>
@@ -32,7 +32,7 @@ const SidePanel = () => {
 
 const MessagePanel = () => {
   return (
-    <div className="flex-1 p-4 flex flex-col">
+    <div className="flex-1 p-4 flex flex-col h-full">
       <div className="flex-1 overflow-auto">
         <ChatLog />
       </div>

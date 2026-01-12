@@ -5,7 +5,7 @@ import { Message, Role, Status } from "../shared/types/chat";
 
 export const ChatLog = observer(() => {
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
+    <div className="flex min-h-full flex-col">
       <div className="mt-auto flex flex-col gap-2">
         {chatStore.messagesList.map((message) => (
           <MessageItem key={message.clientMessageId} message={message} />
