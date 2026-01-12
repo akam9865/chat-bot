@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AuthGate } from "../components/auth/AuthGate";
+import { Suspense } from "react";
+import { ConversationsPanel } from "../components/ConversationsPanel";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,8 +27,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <AuthGate>
+          <div className="flex h-dvh min-h-0 w-full overflow-hidden">
+            <Suspense fallback={<Skeleton />}>
+              <ConversationsPanel />
+            </Suspense>
+            <main className="flex-1 min-w-0 min-h-0">
+              <Suspense fallback={<Skeleton />}>{children}</Suspense>
+            </main>
+          </div>
+        </AuthGate>
       </body>
     </html>
   );
+}
+
+function Skeleton() {
+  // todo: proper skeleton
+  return <div>Loading...</div>;
 }

@@ -2,11 +2,11 @@ import "server-only";
 
 import { getDb } from "../../server/db/client";
 import {
-  conversations,
+  conversations as conversationsTable,
   messages as messagesTable,
 } from "../../server/db/schema";
-import { Status, type Message } from "../../shared/types/chat";
-import { and, eq } from "drizzle-orm";
+import { MessageSchema, Status, type Message } from "../../shared/types/chat";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 export async function appendMessages(
   conversationId: string,
@@ -15,7 +15,7 @@ export async function appendMessages(
   const db = getDb();
   await db.transaction(async (tx) => {
     await tx
-      .insert(conversations)
+      .insert(conversationsTable)
       .values({ id: conversationId })
       .onConflictDoNothing();
 
@@ -57,4 +57,40 @@ export async function updateMessage(
         eq(messagesTable.conversationId, conversationId)
       )
     );
+}
+
+export async function getConversations() {
+  const db = getDb();
+  const conversations = await db
+    .select()
+    .from(conversationsTable)
+    .orderBy(desc(conversationsTable.createdAt));
+  return conversations;
+}
+
+export async function getChatLog(conversationId: string): Promise<Message[]> {
+  const db = getDb();
+  const chatLog = await db
+    .select()
+    .from(messagesTable)
+    .where(eq(messagesTable.conversationId, conversationId))
+    .orderBy(asc(messagesTable.createdAt));
+
+  return chatLog.map((message) =>
+    MessageSchema.parse({
+      ...message,
+      timestamp: message.createdAt.getTime(),
+    })
+  );
+}
+
+export async function createConversation() {
+  const db = getDb();
+  const [conversation] = await db
+    .insert(conversationsTable)
+    .values({
+      id: crypto.randomUUID(),
+    })
+    .returning();
+  return conversation;
 }

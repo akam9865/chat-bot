@@ -12,7 +12,7 @@ type ChatForm = {
 };
 
 class ChatStore {
-  messages: Message[] = [];
+  private messagesByConversationId: Map<string, Message[]> = new Map();
   form: ChatForm = { input: "" };
   conversationId?: string = undefined;
 
@@ -20,32 +20,84 @@ class ChatStore {
     makeAutoObservable(this);
   }
 
+  resetConversation() {
+    this.conversationId = undefined;
+  }
+
+  setConversationId(conversationId: string) {
+    this.getOrCreateConversation(conversationId);
+    this.conversationId = conversationId;
+  }
+
+  hasConversation(conversationId: string): boolean {
+    return this.messagesByConversationId.has(conversationId);
+  }
+
+  get messages(): Message[] {
+    if (!this.conversationId) return [];
+    return this.getOrCreateConversation(this.conversationId);
+  }
+
   get messagesList(): Message[] {
     const messages = this.messages.slice();
-    return messages.sort((a, b) => a.timestamp - b.timestamp);
+    // might not need to sort, we insert in order and query with asc
+    messages.sort((a, b) => a.timestamp - b.timestamp);
+    return messages;
+  }
+
+  private getOrCreateConversation(conversationId: string): Message[] {
+    let conversation = this.messagesByConversationId.get(conversationId);
+    if (!conversation) {
+      conversation = [];
+      this.messagesByConversationId.set(conversationId, conversation);
+    }
+    return conversation;
   }
 
   updateForm(message: string) {
     this.form.input = message;
   }
 
-  send = flow(function* (this: ChatStore) {
+  hydrateConversation(conversationId: string, serverMessages: Message[]) {
+    this.setConversationId(conversationId);
+    const existingMessages = this.getOrCreateConversation(conversationId);
+    const clientMessages = new Map<string, Message>();
+
+    for (const message of existingMessages) {
+      clientMessages.set(message.clientMessageId, message);
+    }
+    for (const message of serverMessages) {
+      const local = clientMessages.get(message.clientMessageId);
+
+      if (!local) {
+        existingMessages.push(message);
+      } else {
+        local.status = message.status;
+        local.text = message.text;
+        local.timestamp = message.timestamp;
+        local.role = message.role;
+        local.id = message.id ?? local.id;
+      }
+    }
+  }
+
+  send = flow(function* (this: ChatStore, conversationId: string) {
     const text = this.form.input.trim();
     if (!text) return;
 
-    this.conversationId ||= crypto.randomUUID();
     const clientMessageId = crypto.randomUUID();
     const assistantMessageId = crypto.randomUUID();
     const timestamp = Date.now();
 
-    const userMessage = {
+    // Optimistically update the UI for the user message only
+    const userMessage: Message = {
       role: Role.USER,
       clientMessageId,
       text,
-      status: Status.PENDING,
+      status: Status.SENT,
       timestamp,
     };
-    const pendingAssistantMessage = {
+    const pendingAssistantMessage: Message = {
       role: Role.ASSISTANT,
       clientMessageId: assistantMessageId,
       text: "",
@@ -53,47 +105,45 @@ class ChatStore {
       timestamp: timestamp + 1,
     };
 
-    this.messages.push(userMessage, pendingAssistantMessage);
+    const conversation = this.getOrCreateConversation(conversationId);
+    conversation.push(userMessage, pendingAssistantMessage);
     this.form.input = "";
 
     try {
       const { messages }: SendMessageResponse = yield sendMessage({
-        conversationId: this.conversationId,
+        conversationId,
         userClientMessageId: clientMessageId,
         assistantClientMessageId: assistantMessageId,
         text,
       });
 
       messages.forEach((message) => {
-        this.reconcileMessage(message);
+        this.reconcileMessage(conversationId, message);
       });
     } catch (e) {
       console.log(e);
 
       // CHAT-11: just setting the user message as failed is not strictly accurate.
       // We'll have to refactor to handle failure permutations.
-      this.reconcileMessage({
+      this.reconcileMessage(conversationId, {
         clientMessageId,
         status: Status.FAILED,
       });
     }
   });
 
-  reconcileMessage({
-    clientMessageId,
-    status,
-    text,
-  }: {
-    clientMessageId: string;
-    status: Status;
-    text?: string;
-  }) {
-    const message = this.messages.find(
+  reconcileMessage(
+    conversationId: string,
+    patch: Partial<Message> & { clientMessageId: string; status: Status }
+  ) {
+    const { clientMessageId, status, text } = patch;
+    const conversation = this.getOrCreateConversation(conversationId);
+    const message = conversation.find(
       (message) => message.clientMessageId === clientMessageId
     );
     if (!message) return;
     message.status = status;
-    message.text = text ?? "";
+    if (text) message.text = text;
   }
 }
 

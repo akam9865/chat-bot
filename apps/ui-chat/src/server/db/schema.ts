@@ -20,7 +20,7 @@ export const messages = pgTable(
     clientMessageId: uuid("client_message_id").notNull(),
     role: text("role").notNull(),
     text: text("text").notNull(),
-    status: text("status"),
+    status: text("status").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [
