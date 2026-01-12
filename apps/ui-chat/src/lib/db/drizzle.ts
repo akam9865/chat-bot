@@ -5,8 +5,8 @@ import {
   conversations as conversationsTable,
   messages as messagesTable,
 } from "../../server/db/schema";
-import { Status, type Message } from "../../shared/types/chat";
-import { and, desc, eq } from "drizzle-orm";
+import { MessageSchema, Status, type Message } from "../../shared/types/chat";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 export async function appendMessages(
   conversationId: string,
@@ -66,4 +66,20 @@ export async function getConversations() {
     .from(conversationsTable)
     .orderBy(desc(conversationsTable.createdAt));
   return conversations;
+}
+
+export async function getChatLog(conversationId: string): Promise<Message[]> {
+  const db = getDb();
+  const chatLog = await db
+    .select()
+    .from(messagesTable)
+    .where(eq(messagesTable.conversationId, conversationId))
+    .orderBy(asc(messagesTable.createdAt));
+
+  return chatLog.map((message) =>
+    MessageSchema.parse({
+      ...message,
+      timestamp: message.createdAt.getTime(),
+    })
+  );
 }

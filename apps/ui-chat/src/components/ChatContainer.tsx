@@ -1,11 +1,22 @@
+"use client";
 import { ChatInput } from "./ChatInput";
 import { ChatLog } from "./ChatLog";
+import type { Message } from "../shared/types/chat";
+import { chatStore } from "../stores/chat";
+import { useEffect } from "react";
 
 export const ChatContainer = ({
   conversationId,
+  messages,
 }: {
   conversationId?: string;
+  messages: Message[];
 }) => {
+  useEffect(() => {
+    if (!conversationId) return;
+    chatStore.hydrateConversation(conversationId, messages);
+  }, [conversationId, messages]);
+
   return (
     <div className="flex w-full h-full min-h-0 min-w-0">
       <MessagePanel />

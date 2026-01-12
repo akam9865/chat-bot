@@ -7,7 +7,7 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <Suspense fallback={<div>Loading...</div>}>
-          <ChatContainer />
+          <ChatContainer messages={[]} />
         </Suspense>
       </main>
     </div>

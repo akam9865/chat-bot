@@ -1,15 +1,22 @@
-import { AuthGate } from "../../../components/auth/AuthGate";
+import { Suspense } from "react";
 import { ChatContainer } from "../../../components/ChatContainer";
+import { getChatLog } from "../../../lib/db/drizzle";
 
-export default function ConversationPage({
+export default async function ConversationPage({
   params,
 }: {
-  params: { conversationId: string };
+  params: Promise<{ conversationId: string }>;
 }) {
-  const { conversationId } = params;
+  const conversationId = (await params).conversationId;
+  const chatLog = await getChatLog(conversationId);
+
   return (
-    <AuthGate>
-      <ChatContainer key={conversationId} conversationId={conversationId} />
-    </AuthGate>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChatContainer
+        key={conversationId}
+        conversationId={conversationId}
+        messages={chatLog}
+      />
+    </Suspense>
   );
 }
