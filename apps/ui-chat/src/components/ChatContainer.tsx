@@ -19,7 +19,7 @@ export const ChatContainer = ({
     if (messages) {
       chatStore.hydrateConversation(conversationId, messages);
     }
-  }, [conversationId, messages]);
+  }, [conversationId]);
 
   return (
     <div className="flex w-full h-full min-h-0 min-w-0">

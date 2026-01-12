@@ -58,15 +58,33 @@ class ChatStore {
     this.form.input = message;
   }
 
-  hydrateConversation(conversationId: string, messages: Message[]) {
-    this.messagesByConversationId.set(conversationId, messages.slice());
+  hydrateConversation(conversationId: string, serverMessages: Message[]) {
+    this.setConversationId(conversationId);
+    const existingMessages = this.getOrCreateConversation(conversationId);
+    const clientMessages = new Map<string, Message>();
+
+    for (const message of existingMessages) {
+      clientMessages.set(message.clientMessageId, message);
+    }
+    for (const message of serverMessages) {
+      const local = clientMessages.get(message.clientMessageId);
+
+      if (!local) {
+        existingMessages.push(message);
+      } else {
+        local.status = message.status;
+        local.text = message.text;
+        local.timestamp = message.timestamp;
+        local.role = message.role;
+        local.id = message.id ?? local.id;
+      }
+    }
   }
 
-  send = flow(function* (this: ChatStore) {
+  send = flow(function* (this: ChatStore, conversationId: string) {
     const text = this.form.input.trim();
     if (!text) return;
 
-    const conversationId = (this.conversationId ||= crypto.randomUUID());
     const clientMessageId = crypto.randomUUID();
     const assistantMessageId = crypto.randomUUID();
     const timestamp = Date.now();
@@ -93,7 +111,7 @@ class ChatStore {
 
     try {
       const { messages }: SendMessageResponse = yield sendMessage({
-        conversationId: this.conversationId,
+        conversationId,
         userClientMessageId: clientMessageId,
         assistantClientMessageId: assistantMessageId,
         text,

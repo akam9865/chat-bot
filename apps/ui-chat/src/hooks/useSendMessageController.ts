@@ -11,12 +11,15 @@ export function useSendMessageController() {
     const text = chatStore.form.input.trim();
     if (!text) return;
 
-    if (!chatStore.conversationId) {
+    let conversationId = chatStore.conversationId;
+
+    if (!conversationId) {
       const createdConversationId = await createConversationAction();
       chatStore.setConversationId(createdConversationId);
       router.push(`/chat/${createdConversationId}`);
+      conversationId = createdConversationId;
     }
 
-    await chatStore.send();
+    await chatStore.send(conversationId);
   };
 }
