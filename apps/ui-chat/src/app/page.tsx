@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 import { getAuthorization } from "../lib/auth/getAuthorization";
 import { Login } from "../components/Login";
 
-async function Auth() {
+async function AuthGate() {
   const isAuthorized = await getAuthorization();
   return isAuthorized ? <ChatContainer /> : <Login />;
 }
@@ -14,10 +14,9 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <Suspense fallback={<div>loading...</div>}>
-          <Auth />
+          <AuthGate />
         </Suspense>
       </main>
-      <footer className={styles.footer} />
     </div>
   );
 }
