@@ -1,11 +1,13 @@
 "use client";
 import { observer } from "mobx-react-lite";
 import { chatStore } from "../stores/chat";
+import { useSendMessageController } from "../hooks/useSendMessageController";
 
 export const ChatInput = observer(() => {
+  const sendMessage = useSendMessageController();
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      chatStore.send();
+      sendMessage();
     }
   };
 
@@ -23,7 +25,7 @@ export const ChatInput = observer(() => {
 
         <button
           type="button"
-          onClick={chatStore.send}
+          onClick={sendMessage}
           className="absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         >
           <svg

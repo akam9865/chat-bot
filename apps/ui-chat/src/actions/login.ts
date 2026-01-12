@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { signToken } from "../../lib/auth/jwt";
+import { signToken } from "../lib/auth/jwt";
 
 export async function loginAction(formData: FormData) {
   const password = String(formData.get("password"));

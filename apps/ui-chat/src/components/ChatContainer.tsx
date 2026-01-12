@@ -10,11 +10,15 @@ export const ChatContainer = ({
   messages,
 }: {
   conversationId?: string;
-  messages: Message[];
+  messages?: Message[];
 }) => {
   useEffect(() => {
     if (!conversationId) return;
-    chatStore.hydrateConversation(conversationId, messages);
+    chatStore.setConversationId(conversationId);
+
+    if (messages) {
+      chatStore.hydrateConversation(conversationId, messages);
+    }
   }, [conversationId, messages]);
 
   return (

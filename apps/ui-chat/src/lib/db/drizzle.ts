@@ -83,3 +83,14 @@ export async function getChatLog(conversationId: string): Promise<Message[]> {
     })
   );
 }
+
+export async function createConversation() {
+  const db = getDb();
+  const [conversation] = await db
+    .insert(conversationsTable)
+    .values({
+      id: crypto.randomUUID(),
+    })
+    .returning();
+  return conversation;
+}

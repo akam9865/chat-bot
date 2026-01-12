@@ -19,6 +19,11 @@ class ChatStore {
   constructor() {
     makeAutoObservable(this);
   }
+
+  resetConversation() {
+    this.conversationId = undefined;
+  }
+
   setConversationId(conversationId: string) {
     this.getOrCreateConversation(conversationId);
     this.conversationId = conversationId;
@@ -55,7 +60,6 @@ class ChatStore {
 
   hydrateConversation(conversationId: string, messages: Message[]) {
     this.messagesByConversationId.set(conversationId, messages.slice());
-    this.conversationId = conversationId;
   }
 
   send = flow(function* (this: ChatStore) {

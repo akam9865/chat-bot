@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { loginAction } from "../app/actions/login";
+import { loginAction } from "../actions/login";
 import { redirect, useRouter } from "next/navigation";
 
 export const Login = () => {
