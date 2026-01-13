@@ -13,7 +13,10 @@ export const ChatContainer = ({
   messages?: Message[];
 }) => {
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId) {
+      chatStore.resetConversation();
+      return;
+    }
     chatStore.setConversationId(conversationId);
 
     if (messages) {

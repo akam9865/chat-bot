@@ -7,6 +7,7 @@ import { verifyToken } from "../../../lib/auth/jwt";
 import {
   appendMessages,
   getChatLog,
+  saveConversation,
   updateMessage,
 } from "../../../lib/db/drizzle";
 
@@ -34,20 +35,27 @@ export async function POST(request: Request) {
     const body = await parseMessageTurnBody(request);
     // Get the chat log before saving to the db. Simple way to avoid duplicates and empty assistant messages.
     const chatLog = await getChatLog(body.conversationId);
-    const savedMessages = await saveMessages(body);
-    const assistantResponse = await callLlm(chatLog, body.content);
 
-    await updateMessage(
+    await saveConversation(body.conversationId);
+    const [savedMessages, assistantResponse] = await Promise.all([
+      saveMessages(body),
+      callLlm(chatLog, body.content),
+    ]);
+
+    const updatedAssistantMessage = await updateMessage(
       body.conversationId,
       body.assistantClientMessageId,
       assistantResponse
     );
 
     const messages = savedMessages.map((message) => {
-      if (message.clientMessageId === body.assistantClientMessageId) {
+      if (
+        message.clientMessageId === updatedAssistantMessage?.clientMessageId
+      ) {
         return {
           ...message,
-          text: assistantResponse,
+          status: updatedAssistantMessage.status,
+          text: updatedAssistantMessage.text,
         };
       }
       return message;

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { chatStore } from "../stores/chat";
 import { createConversationAction } from "../actions/createConversation";
-import { conversationStore } from "../stores/conversation";
 
 export function useSendMessageController() {
   const router = useRouter();
@@ -16,9 +15,9 @@ export function useSendMessageController() {
 
     if (!conversationId) {
       const createdConversation = await createConversationAction();
-      conversationStore.addConversation(createdConversation);
       chatStore.setConversationId(createdConversation.id);
       router.push(`/chat/${createdConversation.id}`);
+      router.refresh();
       conversationId = createdConversation.id;
     }
 
