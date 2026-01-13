@@ -81,8 +81,11 @@ class ChatStore {
     }
   }
 
-  send = flow(function* (this: ChatStore, conversationId: string) {
-    const text = this.form.input.trim();
+  send = flow(function* (
+    this: ChatStore,
+    conversationId: string,
+    text: string
+  ) {
     if (!text) return;
 
     const clientMessageId = crypto.randomUUID();

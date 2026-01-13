@@ -7,5 +7,5 @@ export async function createConversationAction() {
   if (!conversation) {
     throw new Error("Failed to create conversation");
   }
-  return conversation.id;
+  return conversation;
 }

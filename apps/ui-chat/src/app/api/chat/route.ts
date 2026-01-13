@@ -1,10 +1,14 @@
 import { postUserMessage } from "../../../server/ai/anthropic";
 import z from "zod";
-import { Role, Status } from "../../../shared/types/chat";
+import { Message, Role, Status } from "../../../shared/types/chat";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../../lib/auth/jwt";
-import { appendMessages, updateMessage } from "../../../lib/db/drizzle";
+import {
+  appendMessages,
+  getChatLog,
+  updateMessage,
+} from "../../../lib/db/drizzle";
 
 const PostMessageTurnSchema = z.object({
   content: z.string(),
@@ -28,10 +32,11 @@ export async function POST(request: Request) {
   }
   try {
     const body = await parseMessageTurnBody(request);
+    // Get the chat log before saving to the db. Simple way to avoid duplicates and empty assistant messages.
+    const chatLog = await getChatLog(body.conversationId);
     const savedMessages = await saveMessages(body);
-    // relying on saved messages === both sent, but we can have more permutations
-    // CHAT-11: if ai response fails for example. refactor when we implement streaming.
-    const assistantResponse = await callLlm(body.content);
+    const assistantResponse = await callLlm(chatLog, body.content);
+
     await updateMessage(
       body.conversationId,
       body.assistantClientMessageId,
@@ -94,9 +99,9 @@ async function saveMessages(body: PostMessageTurnBody) {
 // todo: split on status codes and add context
 class LlmError extends Error {}
 
-async function callLlm(text: string) {
+async function callLlm(history: Message[], text: string) {
   try {
-    return await postUserMessage(text);
+    return await postUserMessage(history, text);
   } catch (e) {
     throw new LlmError();
   }

@@ -13,7 +13,7 @@ export async function appendMessages(
   messages: Message[]
 ) {
   const db = getDb();
-  await db.transaction(async (tx) => {
+  const inserted = await db.transaction(async (tx) => {
     await tx
       .insert(conversationsTable)
       .values({ id: conversationId })
@@ -28,14 +28,14 @@ export async function appendMessages(
       createdAt: new Date(message.timestamp),
     }));
 
-    await tx
+    return await tx
       .insert(messagesTable)
       .values(values)
       .onConflictDoNothing()
       .returning();
   });
 
-  return messages.map((message) => ({
+  return inserted.map((message) => ({
     clientMessageId: message.clientMessageId,
     text: message.text,
     status: Status.SENT, // CHAT-11: ai messages are pending at this moment
