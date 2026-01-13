@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createConversation } from "../lib/db/drizzle";
 
 export async function createConversationAction() {
@@ -7,5 +8,6 @@ export async function createConversationAction() {
   if (!conversation) {
     throw new Error("Failed to create conversation");
   }
-  return conversation.id;
+  revalidatePath("/");
+  return conversation;
 }

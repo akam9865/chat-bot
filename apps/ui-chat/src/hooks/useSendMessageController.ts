@@ -14,12 +14,13 @@ export function useSendMessageController() {
     let conversationId = chatStore.conversationId;
 
     if (!conversationId) {
-      const createdConversationId = await createConversationAction();
-      chatStore.setConversationId(createdConversationId);
-      router.push(`/chat/${createdConversationId}`);
-      conversationId = createdConversationId;
+      const createdConversation = await createConversationAction();
+      chatStore.setConversationId(createdConversation.id);
+      router.push(`/chat/${createdConversation.id}`);
+      router.refresh();
+      conversationId = createdConversation.id;
     }
 
-    await chatStore.send(conversationId);
+    await chatStore.send(conversationId, text);
   };
 }

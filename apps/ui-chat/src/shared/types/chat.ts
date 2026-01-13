@@ -10,7 +10,6 @@ type Role = (typeof Role)[keyof typeof Role];
 const RoleSchema = z.enum([
   //
   Role.ASSISTANT,
-  Role.SYSTEM,
   Role.USER,
 ]);
 

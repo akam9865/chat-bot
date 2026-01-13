@@ -13,33 +13,28 @@ export async function appendMessages(
   messages: Message[]
 ) {
   const db = getDb();
-  await db.transaction(async (tx) => {
-    await tx
-      .insert(conversationsTable)
-      .values({ id: conversationId })
-      .onConflictDoNothing();
-
-    const values = messages.map((message) => ({
-      conversationId,
-      clientMessageId: message.clientMessageId,
-      role: message.role,
-      text: message.text,
-      status: message.status,
-      createdAt: new Date(message.timestamp),
-    }));
-
-    await tx
-      .insert(messagesTable)
-      .values(values)
-      .onConflictDoNothing()
-      .returning();
-  });
-
-  return messages.map((message) => ({
+  const values = messages.map((message) => ({
+    conversationId,
     clientMessageId: message.clientMessageId,
+    role: message.role,
     text: message.text,
-    status: Status.SENT, // CHAT-11: ai messages are pending at this moment
+    status: message.status,
+    createdAt: new Date(message.timestamp),
   }));
+
+  return await db
+    .insert(messagesTable)
+    .values(values)
+    .onConflictDoNothing()
+    .returning();
+}
+
+export async function saveConversation(conversationId: string) {
+  const db = getDb();
+  await db
+    .insert(conversationsTable)
+    .values({ id: conversationId })
+    .onConflictDoNothing();
 }
 
 export async function updateMessage(
@@ -48,7 +43,7 @@ export async function updateMessage(
   text: string
 ) {
   const db = getDb();
-  await db
+  const [res] = await db
     .update(messagesTable)
     .set({ text, status: Status.SENT })
     .where(
@@ -56,7 +51,9 @@ export async function updateMessage(
         eq(messagesTable.clientMessageId, messageId),
         eq(messagesTable.conversationId, conversationId)
       )
-    );
+    )
+    .returning();
+  return res;
 }
 
 export async function getConversations() {

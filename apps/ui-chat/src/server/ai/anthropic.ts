@@ -2,7 +2,7 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import z from "zod";
-import { Message, Status } from "../../shared/types/chat";
+import { Message, Role } from "../../shared/types/chat";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -22,11 +22,28 @@ const ChatResponseSchema = z.object({
   content: AnthropicMessageSchema.array(),
 });
 
-export async function postUserMessage(message: string): Promise<string> {
+const Models = {
+  cheap: "claude-3-haiku-20240307",
+  haiku: "claude-haiku-4-5-20251001",
+} as const;
+
+export async function postUserMessage(
+  history: Message[],
+  message: string
+): Promise<string> {
+  const messages = [
+    ...history.map((message) => ({
+      role: message.role,
+      content: message.text,
+    })),
+    { role: Role.USER, content: message },
+  ];
+
   const response = await client.messages.create({
-    max_tokens: 100,
-    messages: [{ role: "user", content: message }],
-    model: "claude-3-haiku-20240307",
+    max_tokens: 10_000,
+    // system: "you are an expert in ...", // todo: add system presets + plain text input
+    messages: messages,
+    model: Models.haiku,
   });
 
   const data = ChatResponseSchema.parse(response);
@@ -35,3 +52,5 @@ export async function postUserMessage(message: string): Promise<string> {
     .map((block) => block.text || "")
     .join("");
 }
+
+// todo: use llm to generate a title for the conversation if it's the first message
