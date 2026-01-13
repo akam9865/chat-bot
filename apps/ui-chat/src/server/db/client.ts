@@ -15,7 +15,7 @@ function connect() {
     sql = postgres(connectionString, {
       ssl: "require",
       prepare: false,
-      max: 1,
+      max: 10,
     });
   }
   if (!db) {
