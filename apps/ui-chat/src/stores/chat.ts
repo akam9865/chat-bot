@@ -11,7 +11,7 @@ type ChatForm = {
   input: string;
 };
 
-class ChatStore {
+export class ChatStore {
   private messagesByConversationId: Map<string, Message[]> = new Map();
   form: ChatForm = { input: "" };
   conversationId?: string = undefined;
@@ -84,7 +84,7 @@ class ChatStore {
   send = flow(function* (
     this: ChatStore,
     conversationId: string,
-    text: string
+    text: string,
   ) {
     if (!text) return;
 
@@ -137,12 +137,12 @@ class ChatStore {
 
   reconcileMessage(
     conversationId: string,
-    patch: Partial<Message> & { clientMessageId: string; status: Status }
+    patch: Partial<Message> & { clientMessageId: string; status: Status },
   ) {
     const { clientMessageId, status, text } = patch;
     const conversation = this.getOrCreateConversation(conversationId);
     const message = conversation.find(
-      (message) => message.clientMessageId === clientMessageId
+      (message) => message.clientMessageId === clientMessageId,
     );
     if (!message) return;
     message.status = status;
