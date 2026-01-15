@@ -29,7 +29,7 @@ const Models = {
 
 export async function postUserMessage(
   history: Message[],
-  message: string
+  message: string,
 ): Promise<string> {
   const messages = [
     ...history.map((message) => ({

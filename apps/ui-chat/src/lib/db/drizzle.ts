@@ -10,7 +10,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 
 export async function appendMessages(
   conversationId: string,
-  messages: Message[]
+  messages: Message[],
 ) {
   const db = getDb();
   const values = messages.map((message) => ({
@@ -40,7 +40,7 @@ export async function saveConversation(conversationId: string) {
 export async function updateMessage(
   conversationId: string,
   messageId: string,
-  text: string
+  text: string,
 ) {
   const db = getDb();
   const [res] = await db
@@ -49,8 +49,8 @@ export async function updateMessage(
     .where(
       and(
         eq(messagesTable.clientMessageId, messageId),
-        eq(messagesTable.conversationId, conversationId)
-      )
+        eq(messagesTable.conversationId, conversationId),
+      ),
     )
     .returning();
   return res;
@@ -77,7 +77,7 @@ export async function getChatLog(conversationId: string): Promise<Message[]> {
     MessageSchema.parse({
       ...message,
       timestamp: message.createdAt.getTime(),
-    })
+    }),
   );
 }
 

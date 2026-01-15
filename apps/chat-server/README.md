@@ -1,4 +1,4 @@
-This is a WebSocket server for connecting to the LLM SDKs. 
+This is a WebSocket server for connecting to the LLM SDKs.
 
 ## Getting Started
 

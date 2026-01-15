@@ -49,7 +49,7 @@ export const SendMessageResponseSchema = z.object({
       clientMessageId: z.string(),
       text: z.string(),
       status: StatusSchema,
-    })
+    }),
   ),
 });
 export type SendMessageResponse = z.infer<typeof SendMessageResponseSchema>;

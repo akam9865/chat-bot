@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const updatedAssistantMessage = await updateMessage(
       body.conversationId,
       body.assistantClientMessageId,
-      assistantResponse
+      assistantResponse,
     );
 
     const messages = savedMessages.map((message) => {
@@ -72,7 +72,7 @@ class BadRequestError extends Error {
 }
 
 async function parseMessageTurnBody(
-  req: Request
+  req: Request,
 ): Promise<PostMessageTurnBody> {
   let json: unknown;
   try {
@@ -119,17 +119,17 @@ function handleMessageError(e: any) {
   if (e instanceof BadRequestError) {
     return NextResponse.json(
       { ok: false, error: e.message },
-      { status: e.status }
+      { status: e.status },
     );
   }
   if (e instanceof LlmError) {
     return NextResponse.json(
       { ok: false, error: "llm error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
   return NextResponse.json(
     { ok: false, error: "internal server error" },
-    { status: 500 }
+    { status: 500 },
   );
 }

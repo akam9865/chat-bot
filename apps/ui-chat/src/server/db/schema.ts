@@ -26,7 +26,7 @@ export const messages = pgTable(
   (t) => [
     uniqueIndex("messages_conversation_client_message_unique").on(
       t.conversationId,
-      t.clientMessageId
+      t.clientMessageId,
     ),
-  ]
+  ],
 );
