@@ -1,6 +1,4 @@
-import { Suspense } from "react";
 import { ChatContainer } from "../../../components/ChatContainer";
-import { ChatSkeleton } from "../../../components/skeletons/ChatSkeleton";
 import { getChatLog } from "../../../lib/db/drizzle";
 import { getAuthorization } from "../../../lib/auth/getAuthorization";
 import { redirect } from "next/navigation";
@@ -19,12 +17,10 @@ export default async function ConversationPage({
   const chatLog = await getChatLog(conversationId, user.userId);
 
   return (
-    <Suspense fallback={<ChatSkeleton />}>
-      <ChatContainer
-        key={conversationId}
-        conversationId={conversationId}
-        messages={chatLog}
-      />
-    </Suspense>
+    <ChatContainer
+      key={conversationId}
+      conversationId={conversationId}
+      messages={chatLog}
+    />
   );
 }

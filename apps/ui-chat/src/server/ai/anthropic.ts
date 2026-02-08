@@ -27,7 +27,7 @@ const Models = {
   haiku: "claude-haiku-4-5-20251001",
 } as const;
 
-export async function postUserMessage(
+export async function sendUserMessage(
   history: Message[],
   message: string,
 ): Promise<string> {
@@ -46,11 +46,31 @@ export async function postUserMessage(
     model: Models.haiku,
   });
 
+  return parseAnthropicResponse(response);
+}
+
+export async function generateConversationTitle(
+  userMessage: string,
+): Promise<string> {
+  const response = await client.messages.create({
+    max_tokens: 30,
+    messages: [
+      {
+        role: "user",
+        content: `Generate a short title (max 5 words) for a conversation that starts with this message. Reply with only the title, no quotes or punctuation.\n\nMessage: ${userMessage}`,
+      },
+    ],
+    model: Models.cheap,
+  });
+
+  return parseAnthropicResponse(response);
+}
+
+function parseAnthropicResponse(response: Anthropic.Message): string {
   const data = ChatResponseSchema.parse(response);
   return data.content
     .filter((block) => block.type === "text")
-    .map((block) => block.text || "")
-    .join("");
+    .map((block) => block.text)
+    .join("")
+    .trim();
 }
-
-// todo: use llm to generate a title for the conversation if it's the first message

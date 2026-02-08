@@ -1,12 +1,18 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
-import { getConversations } from "../lib/db/drizzle";
-import { getAuthorization } from "../lib/auth/getAuthorization";
+import { observer } from "mobx-react-lite";
+import { conversationStore } from "../stores/conversations";
+import { SidebarSkeleton } from "./skeletons/SidebarSkeleton";
+import { TypewriterText } from "./TypewriterText";
 
-export const ConversationsPanel = async () => {
-  const user = await getAuthorization();
-  if (!user) return null;
+export const ConversationsPanel = observer(() => {
+  useEffect(() => {
+    conversationStore.load();
+  }, []);
 
-  const conversations = await getConversations(user.userId);
+  if (conversationStore.isLoading) return <SidebarSkeleton />;
 
   return (
     <div className="w-72 shrink-0 h-full min-h-0 overflow-y-auto border border-neutral-200 p-4">
@@ -21,15 +27,15 @@ export const ConversationsPanel = async () => {
         Your Chats
       </h1>
 
-      {conversations.map((conversation) => (
+      {conversationStore.conversations.map((conversation) => (
         <Link
           key={conversation.id}
           href={`/chat/${conversation.id}`}
           className="block text-sm font-medium hover:bg-neutral-100 p-1 rounded-md truncate"
         >
-          {conversation.title || conversation.id}
+          <TypewriterText text={conversation.title} fallback="New Chat" />
         </Link>
       ))}
     </div>
   );
-};
+});

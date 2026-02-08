@@ -43,6 +43,13 @@ export const ChatTurnSchema = z.object({
 });
 export type ChatTurn = z.infer<typeof ChatTurnSchema>;
 
+export const ConversationSchema = z.object({
+  id: z.string(),
+  title: z.string().nullable(),
+  createdAt: z.coerce.date(),
+});
+export type Conversation = z.infer<typeof ConversationSchema>;
+
 export const SendMessageResponseSchema = z.object({
   messages: z.array(
     z.object({
@@ -51,5 +58,6 @@ export const SendMessageResponseSchema = z.object({
       status: StatusSchema,
     }),
   ),
+  title: z.string().nullish(),
 });
 export type SendMessageResponse = z.infer<typeof SendMessageResponseSchema>;

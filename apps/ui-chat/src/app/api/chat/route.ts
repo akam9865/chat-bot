@@ -1,12 +1,15 @@
-import { postUserMessage } from "../../../server/ai/anthropic";
+import {
+  generateConversationTitle,
+  sendUserMessage,
+} from "../../../server/ai/anthropic";
 import z from "zod";
 import { Message, Role, Status } from "../../../shared/types/chat";
 import { NextResponse } from "next/server";
-import { getAuthorization } from "../../../lib/auth/getAuthorization";
+import { requireAuthorization } from "../../../lib/auth/requireAuthorization";
 import {
   appendMessages,
   getChatLog,
-  saveConversation,
+  updateConversationTitle,
   updateMessage,
 } from "../../../lib/db/drizzle";
 
@@ -20,10 +23,8 @@ const PostMessageTurnSchema = z.object({
 type PostMessageTurnBody = z.infer<typeof PostMessageTurnSchema>;
 
 export async function POST(request: Request) {
-  const user = await getAuthorization();
-  if (!user) {
-    return NextResponse.json({ message: "unauthorized" }, { status: 401 });
-  }
+  const { user, response } = await requireAuthorization();
+  if (response) return response;
 
   try {
     const userId = user.userId;
@@ -31,18 +32,20 @@ export async function POST(request: Request) {
     // Get the chat log before saving to the db. Simple way to avoid duplicates and empty assistant messages.
     const chatLog = await getChatLog(body.conversationId, userId);
 
-    // Insert conversation if it doesn't exist
-    await saveConversation(body.conversationId, userId);
-    const [savedMessages, assistantResponse] = await Promise.all([
+    const [title, savedMessages, assistantResponse] = await Promise.all([
+      generateTitleOnFirstMessage(chatLog, body.content),
       insertMessageTurn(body),
       callLlm(chatLog, body.content),
     ]);
 
-    const updatedAssistantMessage = await updateMessage(
-      body.conversationId,
-      body.assistantClientMessageId,
-      assistantResponse,
-    );
+    const [updatedAssistantMessage] = await Promise.all([
+      updateMessage(
+        body.conversationId,
+        body.assistantClientMessageId,
+        assistantResponse,
+      ),
+      title ? updateConversationTitle(body.conversationId, title) : undefined,
+    ]);
 
     const messages = savedMessages.map((message) => {
       if (
@@ -57,7 +60,7 @@ export async function POST(request: Request) {
       return message;
     });
 
-    return NextResponse.json({ ok: true, messages });
+    return NextResponse.json({ ok: true, messages, title });
   } catch (e) {
     return handleMessageError(e);
   }
@@ -100,12 +103,21 @@ async function insertMessageTurn(body: PostMessageTurnBody) {
   ]);
 }
 
+// TODO: consider multiple messages until we're confident in the title
+function generateTitleOnFirstMessage(chatLog: Message[], content: string) {
+  if (chatLog.length > 0) {
+    return undefined;
+  }
+
+  return generateConversationTitle(content).catch(() => undefined);
+}
+
 // todo: split on status codes and add context
 class LlmError extends Error {}
 
 async function callLlm(history: Message[], text: string) {
   try {
-    return await postUserMessage(history, text);
+    return await sendUserMessage(history, text);
   } catch (e) {
     throw new LlmError();
   }

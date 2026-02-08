@@ -1,10 +1,28 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { observer } from "mobx-react-lite";
 import { chatStore } from "../stores/chat";
-import { useSendMessageController } from "../hooks/useSendMessageController";
+import { conversationStore } from "../stores/conversations";
 
 export const ChatInput = observer(() => {
-  const sendMessage = useSendMessageController();
+  const router = useRouter();
+
+  const sendMessage = async () => {
+    const text = chatStore.form.input.trim();
+    if (!text) return;
+
+    let conversationId = chatStore.conversationId;
+
+    if (!conversationId) {
+      const conversation = await conversationStore.create();
+      chatStore.setConversationId(conversation.id);
+      router.push(`/chat/${conversation.id}`);
+      conversationId = conversation.id;
+    }
+
+    await chatStore.send(conversationId, text);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       sendMessage();
