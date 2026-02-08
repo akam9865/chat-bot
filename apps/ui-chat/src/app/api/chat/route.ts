@@ -5,7 +5,7 @@ import {
 import z from "zod";
 import { Message, Role, Status } from "../../../shared/types/chat";
 import { NextResponse } from "next/server";
-import { getAuthorization } from "../../../lib/auth/getAuthorization";
+import { requireAuthorization } from "../../../lib/auth/requireAuthorization";
 import {
   appendMessages,
   getChatLog,
@@ -23,10 +23,8 @@ const PostMessageTurnSchema = z.object({
 type PostMessageTurnBody = z.infer<typeof PostMessageTurnSchema>;
 
 export async function POST(request: Request) {
-  const user = await getAuthorization();
-  if (!user) {
-    return NextResponse.json({ message: "unauthorized" }, { status: 401 });
-  }
+  const { user, response } = await requireAuthorization();
+  if (response) return response;
 
   try {
     const userId = user.userId;
@@ -62,7 +60,7 @@ export async function POST(request: Request) {
       return message;
     });
 
-    return NextResponse.json({ ok: true, messages });
+    return NextResponse.json({ ok: true, messages, title });
   } catch (e) {
     return handleMessageError(e);
   }
@@ -111,11 +109,7 @@ function generateTitleOnFirstMessage(chatLog: Message[], content: string) {
     return undefined;
   }
 
-  try {
-    return generateConversationTitle(content);
-  } catch {
-    return undefined;
-  }
+  return generateConversationTitle(content).catch(() => undefined);
 }
 
 // todo: split on status codes and add context

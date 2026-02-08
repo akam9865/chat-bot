@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ChatStore } from "./chat";
 import { Role, Status, type Message } from "../shared/types/chat";
 
-vi.mock("../clients/ai", () => ({
+vi.mock("../clients/messages", () => ({
   sendMessage: vi.fn(),
 }));
 
-import { sendMessage } from "../clients/ai";
+import { sendMessage } from "../clients/messages";
 
 describe("ChatStore", () => {
   let store: ChatStore;

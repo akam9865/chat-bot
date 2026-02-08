@@ -1,11 +1,12 @@
 import { flow, makeAutoObservable } from "mobx";
-import { sendMessage } from "../clients/ai";
+import { sendMessage } from "../clients/messages";
 import {
   type Message,
   type SendMessageResponse,
   Role,
   Status,
 } from "../shared/types/chat";
+import { conversationStore } from "./conversations";
 
 type ChatForm = {
   input: string;
@@ -113,7 +114,7 @@ export class ChatStore {
     this.form.input = "";
 
     try {
-      const { messages }: SendMessageResponse = yield sendMessage({
+      const { messages, title }: SendMessageResponse = yield sendMessage({
         conversationId,
         userClientMessageId: clientMessageId,
         assistantClientMessageId: assistantMessageId,
@@ -123,6 +124,10 @@ export class ChatStore {
       messages.forEach((message) => {
         this.reconcileMessage(conversationId, message);
       });
+
+      if (title) {
+        conversationStore.updateTitle(conversationId, title);
+      }
     } catch (e) {
       console.log(e);
 

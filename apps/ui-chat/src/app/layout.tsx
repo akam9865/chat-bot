@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Suspense } from "react";
 import { ConversationsPanel } from "../components/ConversationsPanel";
 import { getAuthorization } from "../lib/auth/getAuthorization";
 import { Login } from "../components/Login";
-import { SidebarSkeleton } from "../components/skeletons/SidebarSkeleton";
-import { ChatSkeleton } from "../components/skeletons/ChatSkeleton";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,11 +30,9 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {user ? (
           <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-            <Suspense fallback={<SidebarSkeleton />}>
-              <ConversationsPanel />
-            </Suspense>
+            <ConversationsPanel />
             <main className="flex-1 min-w-0 min-h-0">
-              <Suspense fallback={<ChatSkeleton />}>{children}</Suspense>
+              {children}
             </main>
           </div>
         ) : (
