@@ -1,9 +1,8 @@
 import { postUserMessage } from "../../../server/ai/anthropic";
 import z from "zod";
 import { Message, Role, Status } from "../../../shared/types/chat";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { verifyToken } from "../../../lib/auth/jwt";
+import { getAuthorization } from "../../../lib/auth/getAuthorization";
 import {
   appendMessages,
   getChatLog,
@@ -21,24 +20,21 @@ const PostMessageTurnSchema = z.object({
 type PostMessageTurnBody = z.infer<typeof PostMessageTurnSchema>;
 
 export async function POST(request: Request) {
-  // todo: dedupe the token verification flow
-  const token = (await cookies()).get("auth_token")?.value;
-  if (!token) {
-    return NextResponse.json({ message: "unathorized" }, { status: 401 });
+  const user = await getAuthorization();
+  if (!user) {
+    return NextResponse.json({ message: "unauthorized" }, { status: 401 });
   }
+
   try {
-    await verifyToken(token);
-  } catch {
-    return NextResponse.json({ message: "unathorized" }, { status: 401 });
-  }
-  try {
+    const userId = user.userId;
     const body = await parseMessageTurnBody(request);
     // Get the chat log before saving to the db. Simple way to avoid duplicates and empty assistant messages.
-    const chatLog = await getChatLog(body.conversationId);
+    const chatLog = await getChatLog(body.conversationId, userId);
 
-    await saveConversation(body.conversationId);
+    // Insert conversation if it doesn't exist
+    await saveConversation(body.conversationId, userId);
     const [savedMessages, assistantResponse] = await Promise.all([
-      saveMessages(body),
+      insertMessageTurn(body),
       callLlm(chatLog, body.content),
     ]);
 
@@ -84,7 +80,7 @@ async function parseMessageTurnBody(
   return PostMessageTurnSchema.parse(json);
 }
 
-async function saveMessages(body: PostMessageTurnBody) {
+async function insertMessageTurn(body: PostMessageTurnBody) {
   const now = Date.now();
   return await appendMessages(body.conversationId, [
     {

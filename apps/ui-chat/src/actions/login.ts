@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { signToken } from "../lib/auth/jwt";
+import { findOrCreateAdmin } from "../lib/db/drizzle";
 
 export async function loginAction(formData: FormData) {
   const password = String(formData.get("password"));
@@ -10,7 +11,8 @@ export async function loginAction(formData: FormData) {
     return { ok: false, error: "invalid password" };
   }
 
-  const token = await signToken();
+  const admin = await findOrCreateAdmin();
+  const token = await signToken(admin.id);
   const cookieStore = await cookies();
 
   cookieStore.set("auth_token", token, {

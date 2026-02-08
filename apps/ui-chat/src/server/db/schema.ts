@@ -1,4 +1,5 @@
 import {
+  index,
   pgTable,
   text,
   timestamp,
@@ -6,8 +7,15 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  type: text("type").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const conversations = pgTable("conversations", {
   id: uuid("id").primaryKey(),
+  userId: uuid("user_id").notNull(),
   title: text("title"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
