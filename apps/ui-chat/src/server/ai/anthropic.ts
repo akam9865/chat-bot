@@ -53,4 +53,23 @@ export async function postUserMessage(
     .join("");
 }
 
-// todo: use llm to generate a title for the conversation if it's the first message
+export async function generateTitle(
+  userMessage: string,
+): Promise<string> {
+  const response = await client.messages.create({
+    max_tokens: 30,
+    messages: [
+      {
+        role: "user",
+        content: `Generate a short title (max 5 words) for a conversation that starts with this message. Reply with only the title, no quotes or punctuation.\n\nMessage: ${userMessage}`,
+      },
+    ],
+    model: Models.cheap,
+  });
+
+  const text = response.content
+    .filter((block) => block.type === "text")
+    .map((block) => ("text" in block ? block.text : ""))
+    .join("");
+  return text.trim();
+}

@@ -48,11 +48,15 @@ export async function appendMessages(
     .returning();
 }
 
-export async function saveConversation(conversationId: string, userId: string) {
+export async function saveConversation(
+  conversationId: string,
+  userId: string,
+  title?: string,
+) {
   const db = getDb();
   await db
     .insert(conversationsTable)
-    .values({ id: conversationId, userId })
+    .values({ id: conversationId, userId, title })
     .onConflictDoNothing();
 }
 

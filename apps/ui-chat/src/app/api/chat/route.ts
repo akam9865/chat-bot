@@ -1,4 +1,7 @@
-import { postUserMessage } from "../../../server/ai/anthropic";
+import {
+  generateTitle,
+  postUserMessage,
+} from "../../../server/ai/anthropic";
 import z from "zod";
 import { Message, Role, Status } from "../../../shared/types/chat";
 import { NextResponse } from "next/server";
@@ -31,12 +34,19 @@ export async function POST(request: Request) {
     // Get the chat log before saving to the db. Simple way to avoid duplicates and empty assistant messages.
     const chatLog = await getChatLog(body.conversationId, userId);
 
-    // Insert conversation if it doesn't exist
-    await saveConversation(body.conversationId, userId);
-    const [savedMessages, assistantResponse] = await Promise.all([
+    // Insert conversation if it doesn't exist, generate title on first message
+    const isFirstMessage = chatLog.length === 0;
+    const titlePromise = isFirstMessage
+      ? generateTitle(body.content).catch(() => undefined)
+      : Promise.resolve(undefined);
+
+    const [title, savedMessages, assistantResponse] = await Promise.all([
+      titlePromise,
       insertMessageTurn(body),
       callLlm(chatLog, body.content),
     ]);
+
+    await saveConversation(body.conversationId, userId, title);
 
     const updatedAssistantMessage = await updateMessage(
       body.conversationId,
