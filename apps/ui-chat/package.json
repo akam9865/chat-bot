@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
-    "@repo/ui": "*",
     "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/postcss": "^4.1.18",
     "drizzle-orm": "^0.45.1",
