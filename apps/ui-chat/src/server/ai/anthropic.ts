@@ -27,7 +27,7 @@ const Models = {
   haiku: "claude-haiku-4-5-20251001",
 } as const;
 
-export async function postUserMessage(
+export async function sendUserMessage(
   history: Message[],
   message: string,
 ): Promise<string> {
@@ -49,7 +49,9 @@ export async function postUserMessage(
   return parseAnthropicResponse(response);
 }
 
-export async function generateTitle(userMessage: string): Promise<string> {
+export async function generateConversationTitle(
+  userMessage: string,
+): Promise<string> {
   const response = await client.messages.create({
     max_tokens: 30,
     messages: [

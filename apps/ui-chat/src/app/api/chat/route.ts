@@ -1,6 +1,6 @@
 import {
-  generateTitle,
-  postUserMessage,
+  generateConversationTitle,
+  sendUserMessage,
 } from "../../../server/ai/anthropic";
 import z from "zod";
 import { Message, Role, Status } from "../../../shared/types/chat";
@@ -9,7 +9,7 @@ import { getAuthorization } from "../../../lib/auth/getAuthorization";
 import {
   appendMessages,
   getChatLog,
-  saveConversation,
+  updateConversationTitle,
   updateMessage,
 } from "../../../lib/db/drizzle";
 
@@ -34,25 +34,20 @@ export async function POST(request: Request) {
     // Get the chat log before saving to the db. Simple way to avoid duplicates and empty assistant messages.
     const chatLog = await getChatLog(body.conversationId, userId);
 
-    // Insert conversation if it doesn't exist, generate title on first message
-    const isFirstMessage = chatLog.length === 0;
-    const titlePromise = isFirstMessage
-      ? generateTitle(body.content).catch(() => undefined)
-      : Promise.resolve(undefined);
-
     const [title, savedMessages, assistantResponse] = await Promise.all([
-      titlePromise,
+      generateTitleOnFirstMessage(chatLog, body.content),
       insertMessageTurn(body),
       callLlm(chatLog, body.content),
     ]);
 
-    await saveConversation(body.conversationId, userId, title);
-
-    const updatedAssistantMessage = await updateMessage(
-      body.conversationId,
-      body.assistantClientMessageId,
-      assistantResponse,
-    );
+    const [updatedAssistantMessage] = await Promise.all([
+      updateMessage(
+        body.conversationId,
+        body.assistantClientMessageId,
+        assistantResponse,
+      ),
+      title ? updateConversationTitle(body.conversationId, title) : undefined,
+    ]);
 
     const messages = savedMessages.map((message) => {
       if (
@@ -110,12 +105,25 @@ async function insertMessageTurn(body: PostMessageTurnBody) {
   ]);
 }
 
+// TODO: consider multiple messages until we're confident in the title
+function generateTitleOnFirstMessage(chatLog: Message[], content: string) {
+  if (chatLog.length > 0) {
+    return undefined;
+  }
+
+  try {
+    return generateConversationTitle(content);
+  } catch {
+    return undefined;
+  }
+}
+
 // todo: split on status codes and add context
 class LlmError extends Error {}
 
 async function callLlm(history: Message[], text: string) {
   try {
-    return await postUserMessage(history, text);
+    return await sendUserMessage(history, text);
   } catch (e) {
     throw new LlmError();
   }
