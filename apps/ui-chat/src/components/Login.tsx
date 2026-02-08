@@ -39,13 +39,11 @@ export const Login = () => {
           />
           <button
             type="submit"
-            className="bg-neutral-900 text-white rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800"
+            className="bg-neutral-900 cursor-pointer text-white rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-800"
           >
             Sign In
           </button>
-          {error && (
-            <p className="text-red-600 text-sm text-center">{error}</p>
-          )}
+          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
         </form>
 
         <div className="flex items-center gap-3">
@@ -57,7 +55,7 @@ export const Login = () => {
         <button
           type="button"
           onClick={loginAsGuest}
-          className="border border-neutral-300 rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-50"
+          className="border border-neutral-300 cursor-pointer rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-50"
         >
           Continue as Guest
         </button>
