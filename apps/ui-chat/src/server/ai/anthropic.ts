@@ -46,16 +46,10 @@ export async function postUserMessage(
     model: Models.haiku,
   });
 
-  const data = ChatResponseSchema.parse(response);
-  return data.content
-    .filter((block) => block.type === "text")
-    .map((block) => block.text || "")
-    .join("");
+  return parseAnthropicResponse(response);
 }
 
-export async function generateTitle(
-  userMessage: string,
-): Promise<string> {
+export async function generateTitle(userMessage: string): Promise<string> {
   const response = await client.messages.create({
     max_tokens: 30,
     messages: [
@@ -67,9 +61,14 @@ export async function generateTitle(
     model: Models.cheap,
   });
 
-  const text = response.content
+  return parseAnthropicResponse(response);
+}
+
+function parseAnthropicResponse(response: Anthropic.Message): string {
+  const data = ChatResponseSchema.parse(response);
+  return data.content
     .filter((block) => block.type === "text")
-    .map((block) => ("text" in block ? block.text : ""))
-    .join("");
-  return text.trim();
+    .map((block) => block.text)
+    .join("")
+    .trim();
 }
