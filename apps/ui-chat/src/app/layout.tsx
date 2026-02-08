@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Suspense } from "react";
 import { ConversationsPanel } from "../components/ConversationsPanel";
 import { getAuthorization } from "../lib/auth/getAuthorization";
 import { Login } from "../components/Login";
+import { ChatSkeleton } from "../components/skeletons/ChatSkeleton";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,7 +34,7 @@ export default async function RootLayout({
           <div className="flex h-dvh min-h-0 w-full overflow-hidden">
             <ConversationsPanel />
             <main className="flex-1 min-w-0 min-h-0">
-              {children}
+              <Suspense fallback={<ChatSkeleton />}>{children}</Suspense>
             </main>
           </div>
         ) : (
