@@ -1,14 +1,16 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
-import { verifyToken } from "./jwt";
+import { verifyToken, type TokenPayload } from "./jwt";
 
-export async function getAuthorization() {
-  const token = (await cookies()).get("auth_token")?.value;
-  if (!token) return false;
+export const getAuthorization = cache(
+  async (): Promise<TokenPayload | null> => {
+    const token = (await cookies()).get("auth_token")?.value;
+    if (!token) return null;
 
-  try {
-    await verifyToken(token);
-    return true;
-  } catch {
-    return false;
-  }
-}
+    try {
+      return await verifyToken(token);
+    } catch {
+      return null;
+    }
+  },
+);

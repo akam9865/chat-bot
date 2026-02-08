@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { getConversations } from "../lib/db/drizzle";
+import { getAuthorization } from "../lib/auth/getAuthorization";
 
 export const ConversationsPanel = async () => {
-  const conversations = await getConversations();
+  const user = await getAuthorization();
+  if (!user) return null;
+
+  const conversations = await getConversations(user.userId);
 
   return (
     <div className="w-72 shrink-0 h-full min-h-0 overflow-y-auto border border-neutral-200 p-4">
