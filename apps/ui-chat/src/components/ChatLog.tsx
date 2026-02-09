@@ -2,6 +2,7 @@
 import { observer } from "mobx-react-lite";
 import { chatStore } from "../stores/chat";
 import { Message, Role, Status } from "../shared/types/chat";
+import { MarkdownContent } from "./MarkdownContent";
 
 export const ChatLog = observer(() => {
   return (
@@ -31,7 +32,7 @@ const MessageItem = observer(({ message }: { message: Message }) => {
       key={message.clientMessageId}
       className={`rounded-md px-3 py-2 text-sm max-w-2/3 ${alignMessage} ${backgroundColor}`}
     >
-      {message.text}
+      <MarkdownContent>{message.text}</MarkdownContent>
     </div>
   );
 });
