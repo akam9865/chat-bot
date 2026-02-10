@@ -117,6 +117,7 @@ class LlmError extends Error {}
 
 async function callLlm(history: Message[], text: string) {
   try {
+    // TODO: rename Message.text to Message.content to align with LLM conventions
     const messages = history.map((m) => ({ role: m.role, content: m.text }));
     return await llm.sendUserMessage(messages, text);
   } catch (e) {
