@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { signToken } from "../lib/auth/jwt";
-import { findOrCreateAdmin } from "../lib/db/drizzle";
+import { findOrCreateAdmin } from "@repo/storage";
 
 export async function loginAction(formData: FormData) {
   const password = String(formData.get("password"));

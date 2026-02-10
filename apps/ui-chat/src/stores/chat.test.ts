@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ChatStore } from "./chat";
-import { Role, Status, type Message } from "../shared/types/chat";
+import { Role, Status, type Message } from "@repo/storage/types";
 
 vi.mock("../clients/messages", () => ({
   sendMessage: vi.fn(),

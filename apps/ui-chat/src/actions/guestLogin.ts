@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { signToken } from "../lib/auth/jwt";
-import { createUser } from "../lib/db/drizzle";
+import { createUser } from "@repo/storage";
 
 export async function guestLoginAction() {
   const guest = await createUser("guest");

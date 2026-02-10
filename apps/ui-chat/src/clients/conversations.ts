@@ -1,7 +1,7 @@
 import {
   type Conversation,
   ConversationSchema,
-} from "../shared/types/chat";
+} from "@repo/storage/types";
 import z from "zod";
 
 export async function fetchConversations(): Promise<Conversation[]> {

@@ -1,17 +1,17 @@
 import {
-  generateConversationTitle,
-  sendUserMessage,
-} from "../../../server/ai/anthropic";
-import z from "zod";
-import { Message, Role, Status } from "../../../shared/types/chat";
-import { NextResponse } from "next/server";
-import { requireAuthorization } from "../../../lib/auth/requireAuthorization";
-import {
   appendMessages,
   getChatLog,
   updateConversationTitle,
   updateMessage,
-} from "../../../lib/db/drizzle";
+} from "@repo/storage";
+import { type Message, Role, Status } from "@repo/storage/types";
+import { AnthropicProvider } from "@repo/agent";
+
+import z from "zod";
+import { NextResponse } from "next/server";
+import { requireAuthorization } from "../../../lib/auth/requireAuthorization";
+
+const llm = new AnthropicProvider(process.env.ANTHROPIC_API_KEY!);
 
 const PostMessageTurnSchema = z.object({
   content: z.string(),
@@ -109,7 +109,7 @@ function generateTitleOnFirstMessage(chatLog: Message[], content: string) {
     return undefined;
   }
 
-  return generateConversationTitle(content).catch(() => undefined);
+  return llm.generateConversationTitle(content).catch(() => undefined);
 }
 
 // todo: split on status codes and add context
@@ -117,7 +117,8 @@ class LlmError extends Error {}
 
 async function callLlm(history: Message[], text: string) {
   try {
-    return await sendUserMessage(history, text);
+    const messages = history.map((m) => ({ role: m.role, content: m.text }));
+    return await llm.sendUserMessage(messages, text);
   } catch (e) {
     throw new LlmError();
   }

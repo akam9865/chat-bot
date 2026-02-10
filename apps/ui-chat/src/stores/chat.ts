@@ -5,7 +5,7 @@ import {
   type SendMessageResponse,
   Role,
   Status,
-} from "../shared/types/chat";
+} from "@repo/storage/types";
 import { conversationStore } from "./conversations";
 
 type ChatForm = {

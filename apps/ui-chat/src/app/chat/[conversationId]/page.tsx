@@ -1,5 +1,5 @@
 import { ChatContainer } from "../../../components/ChatContainer";
-import { getChatLog } from "../../../lib/db/drizzle";
+import { getChatLog } from "@repo/storage";
 import { getAuthorization } from "../../../lib/auth/getAuthorization";
 import { redirect } from "next/navigation";
 

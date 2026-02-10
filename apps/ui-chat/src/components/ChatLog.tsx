@@ -1,7 +1,7 @@
 "use client";
 import { observer } from "mobx-react-lite";
 import { chatStore } from "../stores/chat";
-import { Message, Role, Status } from "../shared/types/chat";
+import { Message, Role, Status } from "@repo/storage/types";
 import { MarkdownContent } from "./MarkdownContent";
 
 export const ChatLog = observer(() => {

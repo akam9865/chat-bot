@@ -1,31 +1,10 @@
-import "server-only";
-
-import { getDb } from "../../server/db/client";
+import { getDb } from "../client";
 import {
   conversations as conversationsTable,
   messages as messagesTable,
-  users as usersTable,
-} from "../../server/db/schema";
-import { MessageSchema, Status, type Message } from "../../shared/types/chat";
+} from "../schema";
+import { MessageSchema, Status, type Message } from "../types/chat";
 import { and, asc, desc, eq } from "drizzle-orm";
-
-export async function createUser(type: "guest" | "admin") {
-  const db = getDb();
-  const [user] = await db.insert(usersTable).values({ type }).returning();
-  if (!user) throw new Error("Failed to create user");
-  return user;
-}
-
-export async function findOrCreateAdmin() {
-  const db = getDb();
-  const [existing] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.type, "admin"))
-    .limit(1);
-  if (existing) return existing;
-  return createUser("admin");
-}
 
 export async function appendMessages(
   conversationId: string,

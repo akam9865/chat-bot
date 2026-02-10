@@ -1,7 +1,7 @@
 "use client";
 import { ChatInput } from "./ChatInput";
 import { ChatLog } from "./ChatLog";
-import type { Message } from "../shared/types/chat";
+import type { Message } from "@repo/storage/types";
 import { chatStore } from "../stores/chat";
 import { useEffect } from "react";
 

@@ -1,5 +1,5 @@
 import { flow, makeAutoObservable } from "mobx";
-import { type Conversation } from "../shared/types/chat";
+import { type Conversation } from "@repo/storage/types";
 import {
   createConversation,
   fetchConversations,
