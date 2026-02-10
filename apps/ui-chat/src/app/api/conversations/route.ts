@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuthorization } from "../../../lib/auth/requireAuthorization";
-import {
-  createConversation,
-  getConversations,
-} from "../../../lib/db/drizzle";
+import { createConversation, getConversations } from "@repo/storage";
 
 export async function GET() {
   const { user, response } = await requireAuthorization();

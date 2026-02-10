@@ -9,6 +9,8 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@repo/agent": "*",
+    "@repo/storage": "*",
     "ws": "^8.19.0"
   },
   "devDependencies": {

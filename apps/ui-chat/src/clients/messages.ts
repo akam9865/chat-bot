@@ -1,7 +1,7 @@
 import {
   type SendMessageResponse,
   SendMessageResponseSchema,
-} from "../shared/types/chat";
+} from "@repo/storage/types";
 
 export async function sendMessage({
   conversationId,
